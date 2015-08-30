@@ -6,7 +6,7 @@ static GPath *triangle_overlay_path = NULL;
 
 static Layer *triangle_overlay_layer;
 
-static Layer *s_hands_layer;
+static Layer *hands_overlay_layer;
 
 static GPath *minute_arrow_path, *hour_arrow_path;
 
@@ -58,6 +58,7 @@ static uint8_t Color_Array[12] = {  GColorRedARGB8
                                    ,GColorPictonBlueARGB8     };
 
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
+     APP_LOG(APP_LOG_LEVEL_INFO, "=================");
      for(ix = 0; ix < 12; ix = ix + 1 ) {
            APP_LOG(APP_LOG_LEVEL_WARNING, "Triangle, ctr=%d", ctr);
 	      gpath_rotate_to(triangle_overlay_path, (TRIG_MAX_ANGLE / 360) * angle);
@@ -90,14 +91,14 @@ static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
   gpath_draw_outline(hands_ctx, hour_arrow_path);
 
   // dot in the middle
-  GRect hands_bounds = layer_get_bounds(s_hands_layer);
+  GRect hands_bounds = layer_get_bounds(hands_overlay_layer);
 
   graphics_context_set_fill_color(hands_ctx, GColorYellow);
   graphics_fill_circle(hands_ctx, GPoint(hands_bounds.size.w / 2, hands_bounds.size.h / 2), 5);
 }
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) { 
-  layer_mark_dirty(s_hands_layer);
+  layer_mark_dirty(hands_overlay_layer);
   
   if(tick_time->tm_min % 5 == 0 || processtriangle == 0) {
      ctr=0;
@@ -149,7 +150,7 @@ void handle_deinit(void) {
   tick_timer_service_unsubscribe();
 
   layer_destroy(triangle_overlay_layer);
-  layer_destroy(s_hands_layer);
+  layer_destroy(hands_overlay_layer);
   
   window_destroy(window);
 }
@@ -162,25 +163,30 @@ void handle_init(void) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+  // init background triangle layer
   triangle_overlay_layer = layer_create(bounds);
-	layer_set_update_proc(triangle_overlay_layer, triangle_display_layer_update_callback);
 	layer_add_child(window_layer, triangle_overlay_layer);
+  layer_set_update_proc(triangle_overlay_layer, triangle_display_layer_update_callback);
+
+  // init background triangle path
 	triangle_overlay_path = gpath_create(&TRIANGLE_OVERLAY_POINTS);
 	gpath_move_to(triangle_overlay_path, grect_center_point(&bounds));
   
+  // init hands layer
+  hands_overlay_layer = layer_create(bounds);
+  layer_add_child(window_layer, hands_overlay_layer);
+  layer_set_update_proc(hands_overlay_layer, hands_update_proc);
+
   // init hand paths
   minute_arrow_path = gpath_create(&MINUTE_HAND_POINTS);
   gpath_move_to(minute_arrow_path, grect_center_point(&bounds));
-  
+
   hour_arrow_path = gpath_create(&HOUR_HAND_POINTS);
   gpath_move_to(hour_arrow_path, grect_center_point(&bounds));
 
+  // process every minute
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
 
-  s_hands_layer = layer_create(bounds);
-
-  layer_set_update_proc(s_hands_layer, hands_update_proc);
-  layer_add_child(window_layer, s_hands_layer);
 }
 
 int main(void) {
