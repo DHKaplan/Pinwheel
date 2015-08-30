@@ -1,0 +1,28 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "WA1OUI",
+    "longName": "Pinwheel",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/image_menu_icon.png",
+                "name": "IMAGE_MENU_ICON",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "Pinwheel",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "14d00cde-88ae-4f6b-8318-ddda6b3601d5",
+    "versionLabel": "1.00",
+    "watchapp": {
+        "watchface": true
+    }
+}
