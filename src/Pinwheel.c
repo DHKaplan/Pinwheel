@@ -14,7 +14,7 @@ static int ix;
 
 static int ctr = 0;
 
-static int processtriangle = 0;
+static int BTConnected = 1;
 
 static unsigned int angle = 15;
 
@@ -57,6 +57,17 @@ static uint8_t Color_Array[12] = {  GColorRedARGB8
                                    ,GColorYellowARGB8
                                    ,GColorRajahARGB8     };
 
+void handle_bluetooth(bool connected) {
+    if (connected) {
+         BTConnected = 1;     // Connected
+
+    } else {
+         BTConnected = 0;      // Not Connected
+
+         
+    }
+    layer_mark_dirty(s_hands_layer);
+}
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
              APP_LOG(APP_LOG_LEVEL_WARNING, "Triangle, ctr=%d", ctr);
 
@@ -93,7 +104,12 @@ static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
   // dot in the middle
   GRect hands_bounds = layer_get_bounds(s_hands_layer);
 
-  graphics_context_set_fill_color(hands_ctx, GColorYellow);
+  if (BTConnected == 1) {
+      graphics_context_set_fill_color(hands_ctx, GColorYellow);
+      } else {
+      graphics_context_set_fill_color(hands_ctx, GColorRed);
+  }  
+
   graphics_fill_circle(hands_ctx, GPoint(hands_bounds.size.w / 2, hands_bounds.size.h / 2), 5);
 }
 
@@ -111,6 +127,7 @@ void handle_deinit(void) {
 
   layer_destroy(triangle_overlay_layer);
   layer_destroy(s_hands_layer);
+  bluetooth_connection_service_unsubscribe();
   
   window_destroy(window);
 }
@@ -142,6 +159,9 @@ void handle_init(void) {
 
   layer_set_update_proc(s_hands_layer, hands_update_proc);
   layer_add_child(window_layer, s_hands_layer);
+  
+  bluetooth_connection_service_subscribe(&handle_bluetooth);
+
 }
 
 int main(void) {
