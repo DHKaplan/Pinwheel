@@ -9,7 +9,7 @@
     "resources": {
         "media": [
             {
-                "file": "images/image_menu_icon.png",
+                "file": "images/pinwheel_menu_icon.png",
                 "name": "IMAGE_MENU_ICON",
                 "type": "png"
             }
