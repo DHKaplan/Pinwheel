@@ -2,6 +2,8 @@
 
 Window *window;
 
+Layer       *LineLayer;
+
 static GPath *triangle_overlay_path = NULL;
 
 static Layer *triangle_overlay_layer;
@@ -15,6 +17,9 @@ static int ix;
 static int ctr = 0;
 
 static int BTConnected = 1;
+
+static int  batterychargepct;
+static int  batterycharging = 0;
 
 static unsigned int angle = 15;
 
@@ -68,8 +73,41 @@ void handle_bluetooth(bool connected) {
     }
     layer_mark_dirty(s_hands_layer);
 }
+
+void handle_battery(BatteryChargeState charge_state) {
+
+
+  batterychargepct = charge_state.charge_percent;
+
+  if (charge_state.is_charging) {
+    batterycharging = 1;
+  } else {
+    batterycharging = 0;
+  }
+
+  layer_mark_dirty(LineLayer);
+}
+
+void line_layer_update_callback(Layer *LineLayer, GContext* batctx) {
+
+     graphics_fill_rect(batctx, layer_get_bounds(LineLayer), 3, GCornersAll);
+
+     if (batterycharging == 1) {
+          graphics_context_set_fill_color(batctx, GColorBlue);
+          graphics_fill_rect(batctx, GRect(2, 1, 100, 4), 3, GCornersAll);
+
+     } else if (batterychargepct > 20) {
+          graphics_context_set_fill_color(batctx, GColorGreen);
+          graphics_fill_rect(batctx, GRect(2, 1, batterychargepct, 4), 3, GCornersAll);
+
+     } else {
+          graphics_context_set_fill_color(batctx, GColorRed);
+          graphics_fill_rect(batctx, GRect(2, 1, batterychargepct, 4), 3, GCornersAll);
+     }
+     layer_mark_dirty(LineLayer);
+}
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
-             APP_LOG(APP_LOG_LEVEL_WARNING, "Triangle, ctr=%d", ctr);
+
 
 
      for(ix = 0; ix < 12; ix = ix + 1 ) {
@@ -159,6 +197,15 @@ void handle_init(void) {
 
   layer_set_update_proc(s_hands_layer, hands_update_proc);
   layer_add_child(window_layer, s_hands_layer);
+  
+  // Battery Line
+  GRect line_frame = GRect(22, 160, 104, 6);
+  LineLayer = layer_create(line_frame);
+  layer_set_update_proc(LineLayer, line_layer_update_callback);
+  layer_add_child(window_layer, LineLayer);
+  
+  battery_state_service_subscribe(&handle_battery);
+  handle_battery(battery_state_service_peek());
   
   bluetooth_connection_service_subscribe(&handle_bluetooth);
 
