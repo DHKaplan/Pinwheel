@@ -10,6 +10,10 @@ static Layer *triangle_overlay_layer;
 
 static Layer *s_hands_layer;
 
+GFont        fontRobotoCondensed19;
+
+static char day_text[] =  "  ";
+
 static GPath *minute_arrow_path, *hour_arrow_path;
 
 static int ix;
@@ -108,8 +112,6 @@ void line_layer_update_callback(Layer *LineLayer, GContext* batctx) {
 }
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
 
-
-
      for(ix = 0; ix < 12; ix = ix + 1 ) {
 	      gpath_rotate_to(triangle_overlay_path, (TRIG_MAX_ANGLE / 360) * angle);
 	      graphics_context_set_fill_color(ctx, (GColor)Color_Array[ctr]);
@@ -141,18 +143,24 @@ static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
 
   // dot in the middle
   GRect hands_bounds = layer_get_bounds(s_hands_layer);
+  
+    if (BTConnected == 1) {
+       graphics_context_set_text_color(hands_ctx, GColorDukeBlue);
+       graphics_context_set_fill_color(hands_ctx, GColorYellow);
+    } else {
+       graphics_context_set_text_color(hands_ctx, GColorWhite);
+       graphics_context_set_fill_color(hands_ctx, GColorRed);
+    }  
 
-  if (BTConnected == 1) {
-      graphics_context_set_fill_color(hands_ctx, GColorYellow);
-      } else {
-      graphics_context_set_fill_color(hands_ctx, GColorRed);
-  }  
-
-  graphics_fill_circle(hands_ctx, GPoint(hands_bounds.size.w / 2, hands_bounds.size.h / 2), 5);
+  graphics_fill_circle(hands_ctx, GPoint(hands_bounds.size.w / 2, hands_bounds.size.h / 2), 13);
+  graphics_draw_text(hands_ctx, day_text, fontRobotoCondensed19, GRect(61, 72, 24, 24), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) { 
-    ctr++;
+    
+  strftime(day_text, sizeof(day_text), "%d", tick_time);
+  
+  ctr++;
     if (ctr > 11) {
        ctr = 0;
     }
@@ -165,7 +173,11 @@ void handle_deinit(void) {
 
   layer_destroy(triangle_overlay_layer);
   layer_destroy(s_hands_layer);
+  
   bluetooth_connection_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  
+  fonts_unload_custom_font(fontRobotoCondensed19);
   
   window_destroy(window);
 }
@@ -174,6 +186,8 @@ void handle_init(void) {
   window = window_create();
   window_stack_push(window, true /* Animated */);
   window_set_background_color(window, GColorBlack);
+  
+  fontRobotoCondensed19  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_CONDENSED_19));
   
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -192,6 +206,7 @@ void handle_init(void) {
   gpath_move_to(hour_arrow_path, grect_center_point(&bounds));
 
   tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+  
 
   s_hands_layer = layer_create(bounds);
 
