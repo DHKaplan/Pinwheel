@@ -2,7 +2,7 @@
 
 Window *window;
 
-Layer       *LineLayer;
+Layer         *LineLayer;
 
 static GPath *triangle_overlay_path = NULL;
 
@@ -67,20 +67,19 @@ static uint8_t Color_Array[12] = {  GColorRedARGB8
                                    ,GColorRajahARGB8     };
 
 void handle_bluetooth(bool connected) {
+   APP_LOG(APP_LOG_LEVEL_ERROR, "In Handle BT, connected=%d", connected);
     if (connected) {
          BTConnected = 1;     // Connected
 
     } else {
-         BTConnected = 0;      // Not Connected
-
-         
+         BTConnected = 0;      // Not Connected  
     }
+    APP_LOG(APP_LOG_LEVEL_ERROR, "In Handle BT, BTConn=%d", BTConnected);
     layer_mark_dirty(s_hands_layer);
 }
 
 void handle_battery(BatteryChargeState charge_state) {
-
-
+ APP_LOG(APP_LOG_LEVEL_ERROR, "In Handle BattT, BTConn=%d", BTConnected);
   batterychargepct = charge_state.charge_percent;
 
   if (charge_state.is_charging) {
@@ -111,7 +110,7 @@ void line_layer_update_callback(Layer *LineLayer, GContext* batctx) {
      layer_mark_dirty(LineLayer);
 }
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
-
+ APP_LOG(APP_LOG_LEVEL_ERROR, "Triangle Disp, BTConn=%d", BTConnected);
      for(ix = 0; ix < 12; ix = ix + 1 ) {
 	      gpath_rotate_to(triangle_overlay_path, (TRIG_MAX_ANGLE / 360) * angle);
 	      graphics_context_set_fill_color(ctx, (GColor)Color_Array[ctr]);
@@ -130,7 +129,7 @@ static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) 
 static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
- 
+  
   graphics_context_set_fill_color(hands_ctx, GColorDukeBlue);
 
   gpath_rotate_to(minute_arrow_path, TRIG_MAX_ANGLE * t->tm_min / 60);
@@ -140,10 +139,11 @@ static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
   gpath_rotate_to(hour_arrow_path, (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
   gpath_draw_filled(hands_ctx, hour_arrow_path);
   gpath_draw_outline(hands_ctx, hour_arrow_path);
+    APP_LOG(APP_LOG_LEVEL_ERROR, "In hands update, BTConn=%d", BTConnected);
 
   // dot in the middle
   GRect hands_bounds = layer_get_bounds(s_hands_layer);
-  
+
     if (BTConnected == 1) {
        graphics_context_set_text_color(hands_ctx, GColorDukeBlue);
        graphics_context_set_fill_color(hands_ctx, GColorYellow);
@@ -154,6 +154,19 @@ static void hands_update_proc(Layer *layer, GContext *hands_ctx) {
 
   graphics_fill_circle(hands_ctx, GPoint(hands_bounds.size.w / 2, hands_bounds.size.h / 2), 13);
   graphics_draw_text(hands_ctx, day_text, fontRobotoCondensed19, GRect(61, 72, 24, 24), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+}
+
+
+void handle_appfocus(bool in_focus){
+    if (in_focus) {
+          APP_LOG(APP_LOG_LEVEL_ERROR, "In got focus, BTConn=%d", BTConnected);
+
+        handle_bluetooth(bluetooth_connection_service_peek());
+        layer_mark_dirty(s_hands_layer);
+    } else {
+                APP_LOG(APP_LOG_LEVEL_ERROR, "In got focus out of focus, BTConn=%d", BTConnected);
+
+    }
 }
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) { 
@@ -176,6 +189,7 @@ void handle_deinit(void) {
   
   bluetooth_connection_service_unsubscribe();
   battery_state_service_unsubscribe();
+  app_focus_service_unsubscribe();
   
   fonts_unload_custom_font(fontRobotoCondensed19);
   
@@ -219,10 +233,15 @@ void handle_init(void) {
   layer_set_update_proc(LineLayer, line_layer_update_callback);
   layer_add_child(window_layer, LineLayer);
   
+  //Service subscribes:
   battery_state_service_subscribe(&handle_battery);
+  
   handle_battery(battery_state_service_peek());
   
   bluetooth_connection_service_subscribe(&handle_bluetooth);
+  handle_bluetooth(bluetooth_connection_service_peek());
+
+  app_focus_service_subscribe(&handle_appfocus);
 
 }
 
