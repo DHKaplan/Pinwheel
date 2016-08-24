@@ -111,6 +111,18 @@ void line_layer_update_callback(Layer *LineLayer, GContext* batctx) {
           graphics_context_set_fill_color(batctx, GColorRed);
           graphics_fill_rect(batctx, GRect(2, 1, batterychargepct, 4), 3, GCornersAll);
      }
+  
+    //Battery % Markers
+      graphics_context_set_fill_color(batctx, GColorWhite);
+      graphics_fill_rect(batctx, GRect(89, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(79, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(69, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(59, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(49, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(39, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(29, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(19, 1, 3, 4), 3, GCornerNone);
+      graphics_fill_rect(batctx, GRect(9, 1, 3, 4), 3, GCornerNone);
 }
 
 // Chalk Circle Battery Line
@@ -131,7 +143,20 @@ void RoundBatteryLayer_update_callback(Layer *RoundBatteryLayer, GContext* Round
      } else {
           graphics_context_set_fill_color(Roundctx, GColorRed);
           graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8 /*thickness*/, 0, batterychargepct  * 0.01 * TRIG_MAX_ANGLE);
-     }    
+     }   
+  
+   //Battery % indicators 
+     graphics_context_set_fill_color(Roundctx, GColorWhite);
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 11.0),  (TRIG_MAX_ANGLE / 10) * 1);  //10%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 5.25),  (TRIG_MAX_ANGLE / 10) * 2);  //20%    
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 3.43),  (TRIG_MAX_ANGLE / 10) * 3);  //30%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 2.55),  (TRIG_MAX_ANGLE / 10) * 4);  //40%    
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 2.03),  (TRIG_MAX_ANGLE / 10) * 5);  //50%    
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 1.69),  (TRIG_MAX_ANGLE / 10) * 6);  //60%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 1.445), (TRIG_MAX_ANGLE / 10) * 7);  //70%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 1.265), (TRIG_MAX_ANGLE / 10) * 8);  //80%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 1.12),  (TRIG_MAX_ANGLE / 10) * 9);  //90%
+     graphics_fill_radial(Roundctx, GRect(0, 0, 180, 180), GOvalScaleModeFillCircle, 8, (TRIG_MAX_ANGLE / 1.01),   TRIG_MAX_ANGLE);            //100%
 }
 static void triangle_display_layer_update_callback(Layer *layer, GContext *ctx) {
      for(ix = 0; ix < 12; ix = ix + 1 ) {
@@ -281,3 +306,4 @@ int main(void) {
 
    handle_deinit();
 }
+

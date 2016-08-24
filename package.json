@@ -1,0 +1,42 @@
+{
+    "author": "WA1OUI",
+    "dependencies": {},
+    "keywords": [],
+    "name": "pinwheel",
+    "pebble": {
+        "capabilities": [
+            ""
+        ],
+        "displayName": "Pinwheel",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/pinwheel_menu_icon.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_ICON",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "fonts/Roboto-Condensed.ttf",
+                    "name": "FONT_ROBOTO_CONDENSED_19",
+                    "targetPlatforms": null,
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "14d00cde-88ae-4f6b-8318-ddda6b3601d5",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "2.1.0"
+}
