@@ -4,9 +4,6 @@
     "keywords": [],
     "name": "pinwheel",
     "pebble": {
-        "capabilities": [
-            ""
-        ],
         "displayName": "Pinwheel",
         "enableMultiJS": true,
         "messageKeys": [],
@@ -38,5 +35,5 @@
             "watchface": true
         }
     },
-    "version": "2.1.0"
+    "version": "3.0.0"
 }
